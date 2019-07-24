@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")"
+
+source ./helpers.sh
+source ./vars.sh
+
+./initpki
+
+CA="$(cat "$EASYRSA_PKI/ca.crt")"
+TA="$(cat "$EASYRSA_PKI/ta.key")"
+CLIENT_PK="$(cat "$EASYRSA_PKI/private/$CLIENT_CN.key")"
+CLIENT_CERT="$(openssl x509 -in "$EASYRSA_PKI/issued/$CLIENT_CN.crt")"
+
+cat << EOF > "$OPENVPN/server.ovpn"
+user nobody
+group nobody
+
+dev tun
+port 1194
+proto tcp
+
+ca $EASYRSA_PKI/ca.crt
+cert $EASYRSA_PKI/issued/$SERVER_CN.crt
+dh $EASYRSA_PKI/dh.pem
+key $EASYRSA_PKI/private/$SERVER_CN.key
+tls-auth $EASYRSA_PKI/ta.key 0
+
+comp-lzo no
+duplicate-cn
+keepalive 10 60
+persist-key
+persist-tun
+server 10.8.0.0 255.255.255.0
+
+push "comp-lzo no"
+push "route $NETWORK_ADDRESS $SUBNET_MASK"
+EOF
+
+cat << EOF > "$OPENVPN/client.ovpn"
+client
+dev tun
+nobind
+proto tcp
+remote localhost 1194
+
+key-direction 1
+persist-key
+persist-tun
+remote-cert-tls server
+
+<key>
+$CLIENT_PK
+</key>
+<cert>
+$CLIENT_CERT
+</cert>
+<ca>
+$CA
+</ca>
+<tls-auth>
+$TA
+</tls-auth>
+EOF
+
+iptables -t nat -A POSTROUTING -o "$ETH_DEVICE" -j MASQUERADE
+
+mkdir -p /dev/net
+
+if [ ! -c /dev/net/tun ]; then
+  mknod /dev/net/tun c 10 200
+fi
+
+exec openvpn --config "$OPENVPN/server.ovpn"
