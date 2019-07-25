@@ -43,10 +43,7 @@ const getNetworkIpNameMappings = (networkName, containerInfo) => {
   }));
 };
 
-const getHosts = (ownIpAddress, containerInspections) => {
-  const containerInfos = getContainerInfos(containerInspections);
-  const networkName = findNetworkName(containerInfos, ownIpAddress);
-
+const generateHosts = (ownIpAddress, containerInfos, networkName) => {
   const toIpNameMappings = containerInfos =>
     getNetworkIpNameMappings(networkName, containerInfos);
 
@@ -70,4 +67,8 @@ const getHosts = (ownIpAddress, containerInspections) => {
     .join("\n");
 };
 
-module.exports = getHosts;
+module.exports = {
+  generateHosts,
+  getContainerInfos,
+  findNetworkName
+};

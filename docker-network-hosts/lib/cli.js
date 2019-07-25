@@ -1,4 +1,4 @@
-const path = require("path");
+const fs = require("fs");
 const arg = require("arg");
 const ip = require("ip");
 
@@ -7,12 +7,14 @@ const writeHosts = require("./write-hosts");
 const showUsage = () => {
   console.log(
     [
-      "Usage: docker-network-hosts [options] -o path [ip_address]",
+      "Usage: docker-network-hosts [options] [ip_address]",
       "",
       "Options:",
       "  -h, --help\t\tShow usage",
-      "  -o, --output=...\tWrite the hosts file to the specified location",
-      "  -w, --watch\t\tKeep the hosts file updated"
+      "  -o, --output=...\tWrite the hosts file to the specified directory",
+      "                  \t(default: cwd)",
+      "  -w, --watch\t\tKeep the hosts file updated",
+      "  -c, --cleanup\t\tDelete the hosts file on exit (only in watch mode)"
     ].join("\n")
   );
 };
@@ -26,10 +28,12 @@ const parseAndValidateArgs = argv => {
         "--help": Boolean,
         "--output": String,
         "--watch": Boolean,
+        "--cleanup": Boolean,
         // aliases
         "-h": "--help",
         "-o": "--output",
-        "-w": "--watch"
+        "-w": "--watch",
+        "-c": "--cleanup"
       },
       {
         argv: argv.slice(2)
@@ -45,8 +49,12 @@ const parseAndValidateArgs = argv => {
     process.exit(0);
   }
 
-  if (!options["--output"]) {
-    showUsage();
+  if (
+    options["--output"] != null &&
+    (!fs.existsSync(options["--output"]) ||
+      !fs.statSync(options["--output"]).isDirectory())
+  ) {
+    console.error("Error: output must be a directory");
     process.exit(-1);
   }
 
@@ -57,10 +65,11 @@ const cli = async argv => {
   const options = parseAndValidateArgs(argv);
 
   const ownIpAddress = options._[0] || ip.address();
-  const outputPath = path.resolve(options["--output"]);
+  const outputDirectory = options["--output"] || process.cwd();
   const shouldWatch = options["--watch"];
+  const shouldCleanup = options["--cleanup"];
 
-  await writeHosts(outputPath, ownIpAddress, shouldWatch);
+  await writeHosts(outputDirectory, ownIpAddress, shouldWatch, shouldCleanup);
 };
 
 module.exports = cli;
