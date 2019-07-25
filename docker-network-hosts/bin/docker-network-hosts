@@ -1,0 +1,4 @@
+#!/usr/bin/env node --no-warnings
+
+const cli = require("../lib/cli");
+cli(process.argv);

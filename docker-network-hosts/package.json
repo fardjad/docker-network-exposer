@@ -1,0 +1,29 @@
+{
+  "name": "docker-network-hosts",
+  "version": "1.0.0",
+  "description": "Generates a hosts file containing name mappings for containers in a docker network",
+  "bin": {
+    "docker-network-hosts": "./bin/docker-network-hosts"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "cli",
+    "docker",
+    "network",
+    "hosts"
+  ],
+  "author": "Fardjad Davari <public@fardjad.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "prettier": "^1.18.2"
+  },
+  "dependencies": {
+    "arg": "^4.1.1",
+    "docker-events": "0.0.2",
+    "dockerode": "^2.5.8"
+  }
+}
