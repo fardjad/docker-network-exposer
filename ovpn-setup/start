@@ -7,6 +7,8 @@ cd "$(dirname "$0")"
 source ./helpers.sh
 source ./vars.sh
 
+box_out "Configuring OpenVPN. This might take a while."
+
 ./initpki
 
 CA="$(cat "$EASYRSA_PKI/ca.crt")"
@@ -15,9 +17,6 @@ CLIENT_PK="$(cat "$EASYRSA_PKI/private/$CLIENT_CN.key")"
 CLIENT_CERT="$(openssl x509 -in "$EASYRSA_PKI/issued/$CLIENT_CN.crt")"
 
 cat << EOF > "$OPENVPN/server.ovpn"
-user nobody
-group nobody
-
 dev tun
 port 1194
 proto tcp
@@ -39,7 +38,9 @@ push "comp-lzo no"
 push "route $NETWORK_ADDRESS $SUBNET_MASK"
 EOF
 
-cat << EOF > "$OPENVPN/client.ovpn"
+mkdir -p "$CLIENT_CONFIG_DIR"
+CLIENT_CONFIG_FILE="$CLIENT_CONFIG_DIR/$NETWORK_ADDRESS.ovpn"
+cat << EOF > "$CLIENT_CONFIG_FILE"
 client
 dev tun
 nobind
@@ -65,7 +66,11 @@ $TA
 </tls-auth>
 EOF
 
-iptables -t nat -A POSTROUTING -o "$ETH_DEVICE" -j MASQUERADE
+box_out "Wrote client config to $CLIENT_CONFIG_FILE"
+
+iptables -t nat -C POSTROUTING -o "$ETH_DEVICE" -j MASQUERADE || {
+  iptables -t nat -A POSTROUTING -o "$ETH_DEVICE" -j MASQUERADE
+}
 
 mkdir -p /dev/net
 

@@ -1,13 +1,13 @@
 const fs = require("fs");
 const arg = require("arg");
-const ip = require("ip");
 
 const writeHosts = require("./write-hosts");
+const die = require("./die");
 
 const showUsage = () => {
   console.log(
     [
-      "Usage: docker-network-hosts [options] [ip_address]",
+      "Usage: docker-network-hosts [options] <ip_address>",
       "",
       "Options:",
       "  -h, --help\t\tShow usage",
@@ -41,12 +41,12 @@ const parseAndValidateArgs = argv => {
     );
   } catch (ex) {
     showUsage();
-    process.exit(-1);
+    die();
   }
 
   if (options["--help"]) {
     showUsage();
-    process.exit(0);
+    return;
   }
 
   if (
@@ -54,8 +54,12 @@ const parseAndValidateArgs = argv => {
     (!fs.existsSync(options["--output"]) ||
       !fs.statSync(options["--output"]).isDirectory())
   ) {
-    console.error("Error: output must be a directory");
-    process.exit(-1);
+    die(new Error("Output must be a directory"));
+  }
+
+  if (options._[0] == null) {
+    showUsage();
+    die();
   }
 
   return options;
@@ -64,7 +68,7 @@ const parseAndValidateArgs = argv => {
 const cli = async argv => {
   const options = parseAndValidateArgs(argv);
 
-  const ownIpAddress = options._[0] || ip.address();
+  const ownIpAddress = options._[0];
   const outputDirectory = options["--output"] || process.cwd();
   const shouldWatch = options["--watch"];
   const shouldCleanup = options["--cleanup"];

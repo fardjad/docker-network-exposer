@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
-if [ ! -d "$EASYRSA_PKI" ]; then 
+set -e
+
+if [ ! -f "$OPENVPN/done" ]; then
+    rm -rf "$EASYRSA_PKI"
+
     easyrsa init-pki
     easyrsa --batch build-ca nopass
     easyrsa gen-dh
     openvpn --genkey --secret "$EASYRSA_PKI/ta.key"
     easyrsa build-server-full "$SERVER_CN" nopass
     easyrsa build-client-full "$CLIENT_CN" nopass
+
+    touch "$OPENVPN/done"
 fi

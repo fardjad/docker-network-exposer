@@ -10,6 +10,8 @@ export OPENVPN="/etc/openvpn"
 export EASYRSA="/usr/share/easy-rsa"
 export EASYRSA_PKI="$OPENVPN/pki"
 export EASYRSA_REQ_CN="$CONTAINER_ID" # for CA
+export CLIENT_CONFIG_DIR="$OPENVPN/client-config"
 
-export SERVER_CN="localhost"
+export SERVER_EXTERNAL_IP="localhost"
+export SERVER_CN="server"
 export CLIENT_CN="client"
