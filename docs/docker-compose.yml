@@ -1,0 +1,41 @@
+version: '3.7'
+
+# example docker-compose.yml
+
+services:
+  dne:
+    build: ../
+    init: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./addn-hosts:/opt/docker-network-hosts/addn-hosts
+      - ./client-config:/etc/openvpn/client-config
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - '1194:1194'
+
+  dnsmasq:
+    image: andyshinn/dnsmasq
+    depends_on:
+      - dne
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf
+      - ./addn-hosts:/etc/dnsmasq.d/addn-hosts
+    cap_add:
+      - NET_ADMIN
+    entrypoint: # a nasty hack to wait for DNE to generate the hosts file
+      - /bin/sh
+      - -c
+      - |
+        sleep 10
+        while ! grep nginx /etc/dnsmasq.d/addn-hosts/* &>/dev/null; do
+          sleep 1
+        done
+        exec dnsmasq -k --log-facility=-
+    ports:
+      #- '53:53/udp'
+      - '5454:53/udp' # test with dig @127.0.0.1 -p 5454 nginx
+
+  nginx: # this service will be accessible by name
+    image: nginx
