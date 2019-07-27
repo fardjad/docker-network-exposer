@@ -18,8 +18,8 @@ CLIENT_CERT="$(openssl x509 -in "$EASYRSA_PKI/issued/$CLIENT_CN.crt")"
 
 cat << EOF > "$OPENVPN/server.ovpn"
 dev tun
-port 1194
-proto tcp
+port $OVPN_PORT
+proto $OVPN_PROTO
 
 ca $EASYRSA_PKI/ca.crt
 cert $EASYRSA_PKI/issued/$SERVER_CN.crt
@@ -32,7 +32,7 @@ duplicate-cn
 keepalive 10 60
 persist-key
 persist-tun
-server 10.8.0.0 255.255.255.0
+server $OVPN_NETWORK $OVPN_SUBNET_MASK
 
 push "comp-lzo no"
 push "route $NETWORK_ADDRESS $SUBNET_MASK"
@@ -44,8 +44,8 @@ cat << EOF > "$CLIENT_CONFIG_FILE"
 client
 dev tun
 nobind
-proto tcp
-remote localhost 1194
+proto $OVPN_PROTO
+remote $OVPN_SERVER_ADDRESS $OVPN_PORT
 
 key-direction 1
 persist-key

@@ -2,18 +2,18 @@
 
 ## Motivation
 
-Using Docker on a non-Linux host has its own shortcomings. Due to the way 
-networking is implmeneted in Docker for [Mac][1]/[Windows][2], no bridge 
-interface is created on the host. That makes it impossible to access 
-containers in a user-defined bridge from the host machine (as one would do in 
+Using Docker on a non-Linux host has its own shortcomings. Due to the way
+networking is implmeneted in Docker for [Mac][1]/[Windows][2], no bridge
+interface is created on the host. That makes it impossible to access
+containers in a user-defined bridge from the host machine (as one would do in
 Linux) without exposing containers' ports.
 
-Docker Network Exposer (DNE) aims to boost developers' productivity by doing 
+Docker Network Exposer (DNE) aims to boost developers' productivity by doing
 the following:
 
-1. Running an [OpenVPN][3] server that makes it possible to seamlessly access 
+1. Running an [OpenVPN][3] server that makes it possible to seamlessly access
    a Docker network from the host machine.
-2. Generating an [additional hosts file][4] that can be used by [Dnsmasq][5] 
+2. Generating an [additional hosts file][4] that can be used by [Dnsmasq][5]
    to resolve Docker container names on the host machine.
 
 ## Requriements
@@ -42,32 +42,36 @@ And adjust volume mappings for the following directories:
 
 1. `/etc/openvpn/client-config`:
 
-    DNE will generate an OpenVPN client config in this directory. The 
+    DNE will generate an OpenVPN client config in this directory. The
     generated config should be imported into the OpenVPN client software.
 
 2. `/opt/docker-network-hosts/addn-hosts`:
 
-    A [hosts file][8] will be written to this directory and gets removed once 
-    DNE container is (gracefully) stopped. One can optionally run a Dnsmasq 
-    server on the host machine, configure it to forward queries to some 
-    upstream servers, instruct it to use the additional hosts files in the 
-    abovementioned directory, and finally configure the host machine to 
-    resolve DNS queries through Dnsmasq (a minimal example config can be 
+    A [hosts file][8] will be written to this directory and gets removed once
+    DNE container is (gracefully) stopped. One can optionally run a Dnsmasq
+    server on the host machine, configure it to forward queries to some
+    upstream servers, instruct it to use the additional hosts files in the
+    abovementioned directory, and finally configure the host machine to
+    resolve DNS queries through Dnsmasq (a minimal example config can be
     found [here][9]).
 
-    **NOTE:** Dnsmasq service needs to receive a **SIGHUP** signal in order to 
+    **NOTE:** Dnsmasq service needs to receive a **SIGHUP** signal in order to
     reload the settings.
 
-Once Dnsmasq is configured and the host machine is connected to the VPN, 
-containers on the same Docker network as DNE will be accessible by their 
+Once Dnsmasq is configured and the host machine is connected to the VPN,
+containers on the same Docker network as DNE will be accessible by their
 *names*, *ids* and *aliases*.
+
+## Environment Variables
+
+Have a look at [vars.sh][10] for the list of overridable environment variables.
 
 ## Related Projects / Alternatives
 
-* [devdns][10]
-* [dns-proxy-server][11]
-* [docker-tuntap-osx][12]
-* [dory][13]
+* [devdns][100]
+* [dns-proxy-server][101]
+* [docker-tuntap-osx][102]
+* [dory][103]
 
 ## License
 
@@ -82,7 +86,8 @@ containers on the same Docker network as DNE will be accessible by their
 [7]: http://www.thekelleys.org.uk/dnsmasq/doc.html
 [8]: https://en.wikipedia.org/wiki/Hosts_(file)
 [9]: docs/dnsmasq.conf
-[10]: https://github.com/ruudud/devdns
-[11]: https://github.com/mageddo/dns-proxy-server
-[12]: https://github.com/AlmirKadric-Published/docker-tuntap-osx
-[13]: https://github.com/FreedomBen/dory
+[10]: ovpn-setup/vars.sh
+[100]: https://github.com/ruudud/devdns
+[101]: https://github.com/mageddo/dns-proxy-server
+[102]: https://github.com/AlmirKadric-Published/docker-tuntap-osx
+[103]: https://github.com/FreedomBen/dory
