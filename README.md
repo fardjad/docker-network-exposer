@@ -66,6 +66,7 @@ containers on the same Docker network as DNE will be accessible by their
 
 * [devdns][10]
 * [dns-proxy-server][11]
+* [docker-tuntap-osx][12]
 
 ## License
 
@@ -82,3 +83,4 @@ containers on the same Docker network as DNE will be accessible by their
 [9]: docs/dnsmasq.conf
 [10]: https://github.com/ruudud/devdns
 [11]: https://github.com/mageddo/dns-proxy-server
+[12]: https://github.com/AlmirKadric-Published/docker-tuntap-osx
