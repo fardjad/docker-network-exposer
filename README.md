@@ -64,7 +64,18 @@ containers on the same Docker network as DNE will be accessible by their
 
 ## Environment Variables
 
-Have a look at [vars.sh][10] for the list of overridable environment variables.
+When exposing more than one Docker network at once, you'll most likely want to 
+override the following environment variables:
+
+1. **OVPN_NETWORK_CIDR**: This variable defaults to `10.8.0.0/24` and specifies 
+the OpenVPN subnet to draw client addresses from. A different subnet must be 
+chosen for each Docker network.
+
+2. **OVPN_PORT**: Defaults to `1194` and specifies the port that OpenVPN server 
+listens on. The chosen value will also be used as the port number in the 
+generated OpenVPN client config file.
+
+A full list of overridable environment variables can be found [here][10].
 
 ## Related Projects / Alternatives
 
