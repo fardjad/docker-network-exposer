@@ -9,6 +9,9 @@ export CONTAINER_ID="$(cat /proc/self/cgroup | head -n 1 | awk 'BEGIN { FS="/"; 
 # OpenVPN client certificate CN
 [ -z "$CLIENT_CN" ] && export CLIENT_CN="client"
 
+# Set this to 2048 or 4096 in case you are running DNE on a remote machine
+[ -z "$EASYRSA_KEY_SIZE" ] && export EASYRSA_KEY_SIZE=512
+
 # Name of the ethernet device on the Docker container
 [ -z "$ETH_DEVICE" ] && export ETH_DEVICE="$(ip route show default | awk '{ print $5 }')"
 
